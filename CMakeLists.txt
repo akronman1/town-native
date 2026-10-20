@@ -1,0 +1,36 @@
+cmake_minimum_required(VERSION 3.10)
+project(townplay C)
+
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+find_package(SDL2 REQUIRED)
+
+add_executable(townplay
+  src/main.c src/engine.c src/shot.c src/gfx.c src/audio.c src/paths.c src/util.c src/png.c)
+
+if(TARGET SDL2::SDL2)
+  if(TARGET SDL2::SDL2main)
+    target_link_libraries(townplay PRIVATE SDL2::SDL2main)
+  endif()
+  target_link_libraries(townplay PRIVATE SDL2::SDL2)
+else()
+  target_include_directories(townplay PRIVATE ${SDL2_INCLUDE_DIRS})
+  target_link_libraries(townplay PRIVATE ${SDL2_LIBRARIES})
+endif()
+
+if(MSVC)
+  target_compile_definitions(townplay PRIVATE _CRT_SECURE_NO_WARNINGS)
+  target_compile_options(townplay PRIVATE /W3)
+  set_target_properties(townplay PROPERTIES WIN32_EXECUTABLE TRUE)
+else()
+  target_compile_options(townplay PRIVATE -Wall -Wextra)
+  if(WIN32)
+    set_target_properties(townplay PROPERTIES WIN32_EXECUTABLE TRUE)
+  else()
+    target_link_libraries(townplay PRIVATE m)
+  endif()
+endif()
